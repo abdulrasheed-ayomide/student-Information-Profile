@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information</title>
+
+    <style>
+    
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4e73df, #1cc88a);
+            font-family: "Segoe UI", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+    
+        .container {
+            background: #fff;
+            width: 100%;
+            max-width: 950px;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            color: #555;
+        }
+
+        input, select {
+            padding: 0.65rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4e73df;
+        }
+
+        
+        .add-btn {
+            display: block;
+            margin: 1.5rem auto;
+            padding: 0.7rem 2.5rem;
+            border-radius: 25px;
+            border: none;
+            background: #4e73df;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .add-btn:hover {
+            background: #375acb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        col.sn { width: 8%; }
+        col.name { width: 26%; }
+        col.gender { width: 16%; }
+        col.number { width: 30%; }
+        col.action { width: 20%; }
+
+        thead {
+            background: #f4f6f8;
+        }
+
+        td {
+            border: 1px solid #ddd;
+            padding: 0.6rem;
+            text-align: center;
+            font-size: 0.9rem;
+            white-space: nowrap; 
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .delete-btn {
+            padding: 0.35rem 1rem;
+            font-size: 0.8rem;
+            border-radius: 14px;
+            border: none;
+            background: #e74a3b;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        @media (max-width: 600px) {
+            col.sn,
+            td.sn {
+                display: none;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            td {
+                padding: 0.45rem;
+                font-size: 0.8rem;
+            }
+
+            .delete-btn {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.7rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h1>Student Information</h1>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="name" placeholder="Enter name">
+        </div>
+
+        <div class="form-group">
+            <label>Gender</label>
+            <select id="gender">
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="custom">Custom</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="number" id="number" placeholder="Enter phone number">
+        </div>
+
+        <div class="form-group">
+            <label>Search</label>
+            <input type="search" id="search" placeholder="Search students">
+        </div>
+    </div>
+
+    <button class="add-btn" onclick="addStudentInfo()">Add Student</button>
+
+    <table>
+        <colgroup>
+            <col class="sn">
+            <col class="name">
+            <col class="gender">
+            <col class="number">
+            <col class="action">
+        </colgroup>
+        <thead>
+            <tr>
+                <td class="sn">S/N</td>
+                <td>Name</td>
+                <td>Gender</td>
+                <td>Number</td>
+                <td>Action</td>
+            </tr>
+        </thead>
+        <tbody id="show"></tbody>
+    </table>
+</div>
+
+<script>
+    const nameInp = document.getElementById("name");
+    const numberInp = document.getElementById("number");
+    const genderInp = document.getElementById("gender");
+    const searchInp = document.getElementById("search");
+    const display = document.getElementById("show");
+
+    let students = JSON.parse(localStorage.getItem("student")) || [];
+
+    render(students); // ✅ show saved data on load
+
+    function addStudentInfo() {
+        const name = nameInp.value.trim();
+        const number = numberInp.value.trim();
+        const gender = genderInp.value;
+
+        if (!name || !number || !gender) {
+            alert("Please fill all fields");
+            return;
+        }
+
+        students.push({ name, number, gender });
+        localStorage.setItem("student", JSON.stringify(students));
+        render(students);
+
+        nameInp.value = "";
+        numberInp.value = "";
+        genderInp.value = "";
+    }
+
+    function render(arr) {
+        display.innerHTML = "";
+        arr.forEach((item, index) => {
+            display.innerHTML += `
+                <tr>
+                    <td class="sn">${index + 1}</td>
+                    <td>${item.name}</td>
+                    <td>${item.gender}</td>
+                    <td>${item.number}</td>
+                    <td>
+                        <button class="delete-btn" onclick="removeStudent('${item.number}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function removeStudent(number) {
+        students = students.filter(s => s.number !== number);
+        localStorage.setItem("student", JSON.stringify(students));
+        render(students);
+    }
+
+    searchInp.addEventListener("input", () => {
+        const value = searchInp.value.toLowerCase();
+        const filtered = students.filter(s =>
+            s.name.toLowerCase().includes(value) ||
+            s.number.includes(value)
+        );
+        render(filtered);
+    });
+</script>
+</body>
+</html>
